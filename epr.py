@@ -302,9 +302,9 @@ class HTMLtoLines(HTMLParser):
             self.text[-1] += line
             if self.ishead:
                 self.idhead.add(len(self.text)-1)
-            elif self.isbull:
+            elif self.isbull and line:
                 self.idbull.add(len(self.text)-1)
-            elif self.isinde:
+            elif self.isinde and line:
                 self.idinde.add(len(self.text)-1)
             elif self.ispref:
                 self.idpref.add(len(self.text)-1)
