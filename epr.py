@@ -66,8 +66,11 @@ from difflib import SequenceMatcher as SM
 
 
 # key bindings
-SCROLL_DOWN = {curses.KEY_DOWN, ord("j")}
-SCROLL_UP = {curses.KEY_UP, ord("k")}
+SCROLL_DOWN = {curses.KEY_DOWN}
+SCROLL_DOWN_J = {ord("j")}
+SCROLL_UP = {curses.KEY_UP}
+SCROLL_UP_K = {ord("k")}
+PARA_DOWN = {ord("e"), ord("\n")}
 HALF_DOWN = {4}
 HALF_UP = {21}
 PAGE_DOWN = {curses.KEY_NPAGE, ord("l"), ord(" "), curses.KEY_RIGHT}
@@ -302,9 +305,9 @@ class HTMLtoLines(HTMLParser):
             self.text[-1] += line
             if self.ishead:
                 self.idhead.add(len(self.text)-1)
-            elif self.isbull:
+            elif self.isbull and line:
                 self.idbull.add(len(self.text)-1)
-            elif self.isinde:
+            elif self.isinde and line:
                 self.idinde.add(len(self.text)-1)
             elif self.ispref:
                 self.idpref.add(len(self.text)-1)
@@ -675,7 +678,6 @@ def searching(stdscr, pad, src, width, y, ch, tot):
             ipt = stat.get_wch()
             if type(ipt) == str:
                 ipt = ord(ipt)
-
             if ipt == 27:
                 stat.clear()
                 stat.refresh()
@@ -917,6 +919,11 @@ def reader(stdscr, ebook, index, width, y, pctg):
                     return -1, width, -rows, None
                 else:
                     y = 0
+            elif k in SCROLL_UP_K:
+                if count > 1:
+                    svline = y - 1
+                if y >= count:
+                    y -= count
             elif k in PAGE_UP:
                 if y == 0 and index != 0:
                     return -1, width, -rows, None
@@ -931,6 +938,11 @@ def reader(stdscr, ebook, index, width, y, pctg):
                     return 1, width, 0, None
                 else:
                     y = totlines - rows
+            elif k in SCROLL_DOWN_J:
+                if count > 1:
+                    svline = y + rows - 1
+                if y + count <= totlines - 2:
+                    y += count
             elif k in PAGE_DOWN:
                 if totlines - y - LINEPRSRV > rows:
                     # y = pgdn(y, totlines, rows, LINEPRSRV, count)
@@ -941,6 +953,13 @@ def reader(stdscr, ebook, index, width, y, pctg):
                 countstring = str(rows//2)
                 k = list(SCROLL_UP)[0]
                 continue
+            elif k in PARA_DOWN:
+                lines_left = src_lines[y:]
+                for idx,l in enumerate(lines_left):
+                    if idx > 0 and l == "":
+                        scroll_to = idx
+                        break
+                y = y + scroll_to
             elif k in HALF_DOWN:
                 countstring = str(rows//2)
                 k = list(SCROLL_DOWN)[0]
