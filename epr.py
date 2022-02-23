@@ -318,7 +318,15 @@ class HTMLtoLines(HTMLParser):
             return self.text
         for n, i in enumerate(self.text):
             if n in self.idhead:
-                text += [i.rjust(width//2 + len(i)//2)] + [""]
+                if len(i) < width:
+                    text += [""] + [i.rjust(width//2 + len(i)//2)] + [""]
+                else:
+                    h = []
+                    lines = textwrap.wrap(i, width - 8)
+                    for line in lines:
+                        h.append(line.rjust(width//2 + len(line)//2))
+                    text += [""] + h + [""]
+                        # text += [""] + textwrap.wrap(i, width) + [""]
             elif n in self.idinde:
                 text += ["   "+j for j in textwrap.wrap(i, width - 3)] + [""]
             elif n in self.idbull:
