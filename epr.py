@@ -964,9 +964,12 @@ def reader(stdscr, ebook, index, width, y, pctg):
             elif k in PARA_DOWN:
                 lines_left = src_lines[y:]
                 for idx,l in enumerate(lines_left):
-                    if idx > 0 and l == "" and lines_left[idx+1] != "":
-                        scroll_to = idx
-                        break
+                    try:
+                        if idx > 0 and l == "" and lines_left[idx+1] != "":
+                            scroll_to = idx
+                            break
+                    except IndexError as e:
+                            scroll_to = 0
                 y = y + scroll_to
             elif k in HALF_DOWN:
                 countstring = str(rows//2)
